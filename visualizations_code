@@ -1,0 +1,8 @@
+#visualizations for most popular genres - data source changes per year, please see the clean up code
+most_popular_genres_by_year=sns.catplot(x='Genre Label',y='Streams',data=df_genres_sum2017)
+plt.xticks(rotation=-45) 
+
+#visualizations for top songs data - data source changes per year, please see the clean up code
+top10_vsl=sns.barplot(x='Track', y='Royalties', data=top10_2017)
+plt.xticks(fontsize=100,rotation=-45) 
+plt.yticks(fontsize=90) 
