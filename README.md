@@ -5,4 +5,6 @@ Raw data file can be found under "Raw Data" (original source: https://www.kaggle
 
 The raw data file contains a tab with dummy royalties data, created only for the purporse of this exercise
 
+Visualizations show the most popular genre by year and the top 10 songs by year
+
 Analysis and visualizations were made in jupyter lab
