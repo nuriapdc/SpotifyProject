@@ -1,0 +1,69 @@
+#import of raw data
+songs_dtype={'Rank':'int64',
+            'Track':'string',
+            'Artist':'string',
+            'Streams':'int64',
+            'Link':'string',
+            'Week':'datetime64',
+            'Album_Name':'string',
+            'Explicit':'bool',
+            'Track_Number':'int8',
+            'Artist_Followers':'int64',
+            'Artist_Genres':'string'}
+royalties_dtype={'Rank':'int8',
+                'Track':'string',
+                'Artist':'string',
+                'Royalties':'int64'}
+songs_data=pd.read_excel('Spotify_Top_200_Global.xlsx',sheet_name='Spotify_Top_200_Global',dtype=songs_dtype) #Spotify songs data
+roys_data=pd.read_excel('Spotify_Top_200_Global.xlsx',sheet_name='Royalties',dtype=royalties_dtype) #Random royalties value assigned to each song
+global_data=pd.merge(songs_data,roys_data) #Join songs and roys data 
+global_data.columns=global_data.columns.str.title() #Making sure all column titles are capitalized
+global_data=global_data.rename(columns={'Album_Name':'Album Name',
+                                               'Track_Number_On_Album':'Album Track',
+                                               'Artist_Followers':'Artist Followers',
+                                               'Artist_Genres':'Genres'}) #Renaming columns
+                                               
+#adding a year column for an easier grouping of data
+global_data=pd.DataFrame(global_data)    
+global_data['Year']=global_data['Week'].dt.year
+year=global_data['Year']
+global_data['Year']=year 
+
+#getting rid of missing/unnecessary data
+global_data=global_data.dropna() 
+global_data=global_data.drop(columns=['Link'])
+
+#creating genre category
+genre_dict={"pop":"pop","rock":"rock","edm":"edm","hip hop":"hip hop","latin":"latin","trap":"trap","soul":"soul","indie":"indie",
+           "capella":"classical","acoustic":"classical","adult standards":"nostalgia","trap":"trap","rap":"rap"}
+global_data['Genre Label']=(global_data['Genres'].str.extract(fr"\b({'|'.join(genre_dict.keys())})\b")[0]
+                    .map(genre_dict))
+global_data['Genre Label'].astype('category')
+
+#grouping data by year
+df_2017=global_data[global_data['Week'].dt.year==2017]
+df_2018=global_data[global_data['Week'].dt.year==2018]
+df_2019=global_data[global_data['Week'].dt.year==2019]
+df_2020=global_data[global_data['Week'].dt.year==2020]
+df_2021=global_data[global_data['Week'].dt.year==2021]
+
+#grouping total royalties by year
+df_roys_sum2017=df_2017.groupby(['Track','Artist'])['Royalties'].sum().reset_index()
+df_roys_sum2018=df_2018.groupby(['Track','Artist'])['Royalties'].sum().reset_index()
+df_roys_sum2019=df_2019.groupby(['Track','Artist'])['Royalties'].sum().reset_index()
+df_roys_sum2020=df_2020.groupby(['Track','Artist'])['Royalties'].sum().reset_index()
+df_roys_sum2021=df_2021.groupby(['Track','Artist'])['Royalties'].sum().reset_index()
+
+#top10 df per year
+top10_2017=pd.DataFrame(df_roys_sum2017.nlargest(10,'Royalties'))
+top10_2018=pd.DataFrame(df_roys_sum2018.nlargest(10,'Royalties'))
+top10_2019=pd.DataFrame(df_roys_sum2019.nlargest(10,'Royalties'))
+top10_2020=pd.DataFrame(df_roys_sum2020.nlargest(10,'Royalties'))
+top10_2021=pd.DataFrame(df_roys_sum2021.nlargest(10,'Royalties'))
+
+#grouping total genres by year
+df_genres_sum2017=df_2017.groupby(['Genre Label','Year'])['Streams'].sum().reset_index()
+df_genres_sum2018=df_2018.groupby(['Genre Label','Year'])['Streams'].sum().reset_index()
+df_genres_sum2019=df_2019.groupby(['Genre Label','Year'])['Streams'].sum().reset_index()
+df_genres_sum2020=df_2020.groupby(['Genre Label','Year'])['Streams'].sum().reset_index()
+df_genres_sum2021=df_2021.groupby(['Genre Label','Year'])['Streams'].sum().reset_index()
